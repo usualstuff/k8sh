@@ -1,3 +1,25 @@
+config_file_choose() {
+  unset options i
+  while IFS= read -r -d $'\0' f; do
+    f=$(basename $f)
+    options[i++]="$f"
+  done < <(find "$HOME/.kube" -maxdepth 1 -type f -print0 )
+
+  if [ "${#options[@]}" -eq 0 ]; then
+    return 
+  fi
+
+  echo "Choose kube config file:"
+  select opt in "${options[@]}"; do
+    case $opt in
+      *)
+        export KUBECONFIG="$HOME/.kube/$opt"
+        return
+        ;;
+    esac
+  done
+}
+
 ct() {
   if [ -z "$1" ]; then
     echo $KUBECTL_CONTEXT
@@ -131,6 +153,8 @@ k8sh_init() {
   echo -e "Context: $CONTEXT_COLOR$(ct)$RESTORE"
   echo -e "Namespace: $NAMESPACE_COLOR$KUBECTL_NAMESPACE$RESTORE"
 }
+
+config_file_choose
 export -f k8sh_init
 
 echo "Initializing..."
