@@ -4,7 +4,7 @@ config_file_choose() {
   while IFS= read -r -d $'\0' f; do
     f=$(basename $f)
     options[i++]="$f"
-  done < <(find "$HOME/.kube" -maxdepth 1 -type f -print0 )
+  done < <(find "$HOME/.kube" -maxdepth 1 -type f -print0 | sort -z)
 
   if [ "${#options[@]}" -eq 0 ]; then
     return 
@@ -186,7 +186,7 @@ k8sh_init() {
   echo -e "Namespace: $NAMESPACE_COLOR$KUBECTL_NAMESPACE$RESTORE"
 }
 
-config_file_choose
+config_file_choose || exit 0
 export -f k8sh_init
 
 echo "Initializing..."
